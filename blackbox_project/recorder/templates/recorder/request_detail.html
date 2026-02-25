@@ -1,60 +1,137 @@
-<h1>BLACKBOX - Request Detail </h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BLACKBOX - Request Detail</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #f0f0f0;
+            font-family: "Segoe UI", sans-serif;
+            line-height: 1.5;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+        }
+        button {
+            background-color: #1f1f1f;
+            color: #f0f0f0;
+            border: 1px solid #555;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #333;
+        }
+        pre {
+            background-color: #1e1e1e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .flex-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .flex-item {
+            flex: 1;
+        }
+        hr {
+            border: 0.5px solid #333;
+            margin: 20px 0;
+        }
+        a {
+            color: #4aa3df;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
 
+<h1>BLACKBOX - Request Detail</h1>
+
+<!-- Replay Button -->
 <form action="{% url 'bb_replay' record.pk %}" method="post">
    {% csrf_token %}
-   <button type="submit" >Replay This Request</button>
+   <button type="submit">Replay This Request</button>
 </form>
+
+<!-- Replay Results -->
 {% if replay_result %}
 <hr>
 <h2>Replay Result</h2>
-<p><b>Status match:</b> {{ replay_result.status_match  }}</p>
-<p><b>Body Match :</b> {{ replay_result.body_match  }}</p>
-
-<p><b>Original Status:</b> {{ replay_result.original_status }}</p>
-<p><b> Replay Status  :</b> {{ replay_result.replay_status }}</p>
-
 <p><b>Notes:</b> {{ replay_result.notes }}</p>
+<p><b>Status:</b> {{ replay_result.original_status }} → {{ replay_result.replay_status }}</p>
+<p><b>Status Match:</b> {{ replay_result.status_match }}</p>
+<p><b>Body Match:</b> {{ replay_result.body_match }}</p>
+
+<div class="flex-container">
+    <div class="flex-item">
+        <h3>Original Body</h3>
+        <pre>{{ replay_result.original_body|default:"<empty>" }}</pre>
+    </div>
+    <div class="flex-item">
+        <h3>Replayed Body</h3>
+        <pre>{{ replay_result.replay_body|default:"<empty>" }}</pre>
+    </div>
+</div>
+{% else %}
+<hr>
+<p><i>No replay performed yet. Click the button above to replay this request.</i></p>
 {% endif %}
 
-
-
-
-
-
+<!-- Request Info -->
 <hr>
 <h2>Request Info</h2>
 <p><b>Timestamp:</b> {{ timestamp }}</p>
-<p><b>Method::</b> {{ method }}</p>
+<p><b>Method:</b> {{ method }}</p>
 <p><b>Path:</b> {{ path }}</p>
 
-<hr>
-
-<h2>Response Info</h2>
-<p><b>Status Code</b> {{ original_response_status }}</p>
-
-{% if response_body %}
-<h3>Response Body</h3>
-<pre> {{ original_response_body }} </pre>
-{% else %}
-<p><i>No response body recorded</i></p>
-{% endif %}
-
-<hr>
-<h2>Headers</h2>
-<pre>
-    {% for key, value in headers.items %}      
-    {{ key }}: {{ value }}
-    {% endfor %}
-</pre>
-
+<!-- Request Body -->
 <hr>
 <h2>Request Body</h2>
-{% if body_raw %}
+{% if body_parsed %}
 <pre>{{ body_parsed }}</pre>
+{% elif body_raw %}
+<pre>{{ body_raw }}</pre>
 {% else %}
-<p><i>Not a JSON request.</i></p>
+<p><i>No request body recorded.</i></p>
+{% endif %}
+
+<!-- Response Info -->
+<hr>
+<h2>Response Info</h2>
+<p><b>Status Code:</b> {{ original_response_status }}</p>
+{% if original_response_body %}
+<h3>Response Body</h3>
+<pre>{{ original_response_body }}</pre>
+{% else %}
+<p><i>No response body recorded.</i></p>
+{% endif %}
+
+<!-- Headers -->
+<hr>
+<h2>Headers</h2>
+{% if headers %}
+<pre>
+{% for key, value in headers.items %}
+{{ key }}: {{ value }}
+{% endfor %}
+</pre>
+{% else %}
+<p><i>No headers recorded.</i></p>
 {% endif %}
 
 <hr>
-
 <a href="{% url 'blackbox-inspect' %}">Back to Dashboard</a>
+
+</body>
+</html>
