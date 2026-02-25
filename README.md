@@ -1,4 +1,4 @@
-WHAT IS BLACKBOX?  v1 -> RECORDING + REPLAY + COMPARISON
+WHAT IS BLACKBOX?  v1 -> RECORDING + REPLAY + COMPARISON  NOW ADDED DRAFT INSPECTION DASHBOARD with analysis
 BLACKBOX is a django middleware that records failing HTTP requests and lets the user replay them as they originally happened.
 
 like a FLIGHT RECORDER for backend
