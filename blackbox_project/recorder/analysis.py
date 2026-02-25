@@ -1,7 +1,7 @@
 from django.db.models import Count,Max #to do analytics stuff in sql [our req db!!]
 from .models import RecordedRequest  
 
-def failure_summary():
+def failure_summary(queryset):
     """Analysyis recorded failures and return a digonostic summary"""
     queryset = RecordedRequest.objects.all()    #got all of our recordde requests in query set 
 
@@ -18,7 +18,7 @@ def failure_summary():
     total_failure = queryset.count()
 
     #GROUP by statuscodes
-    status_breakdown = (
+    status_breakdown = (              #status code : number of time it occur  -> 500 : 4
          queryset.values("response_status") #  from our rec req =queryset group by response status
          .annotate(count=Count("id"))    #for every group{each status code} COUNT - how many row exists ok? - count by id = count how many id are there cuz if id exist row exist as every req has id [id is unique also!!]     
          .order_by("-count")  # sort desc order of the counts so freq falure appear first!!!  as more count = more req = more ffailures
@@ -46,6 +46,8 @@ def failure_summary():
        "by_status": by_status,
        "top_paths": top_paths,
        "last_seen": last_seen,
+       "path_breakdown": path_breakdown
+       
     }
 
 

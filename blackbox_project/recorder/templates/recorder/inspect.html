@@ -1,0 +1,50 @@
+<h1>BLACKBOX INSPECTION DASHBOARD</h1>
+<p><b>Total recorded requests:</b>{{ total }}</p>      
+<!-- these var are returned by our vies_inspect.py's fxn view isnpect_dashboard which gave us contextobj tat contain thise var -->
+<p><b>activity (last 10 minutes):</b>{{ recent_count }}</p>
+
+
+<h2>STATUS BREAKDOWN</h2>
+<ul>
+<!-- for loop to kidn render every item of status_breakdown from our analytics file -->
+{% for status, count in analytics.by_status.items %}    
+  <li> {{ status }} &rarr;  {{ count }}</li>
+{% empty %}
+  <li>No Data</li>
+{% endfor %}
+</ul>
+
+
+<h2>Top Paths</h2>
+<ul>
+<!-- for loop to kidn render every item of status_breakdown from our analytics file -->
+{% for path ,count in analytics.top_paths %}    
+  <li> {{ path }} &rarr;  {{ count }}</li>
+{% empty %}
+  <li>No Data</li>
+{% endfor %}
+</ul>
+
+<h2>Latest Captures</h2>
+<table border="1" cellpadding="5" >
+
+<tr>
+<th>Timestamp</th>
+<th>Method</th>
+<th>Path</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+{% for r in latest %}    
+<tr>
+   <td> {{r.timestamp }} </td>
+   <td> {{r.method }} </td>
+   <td> {{r.path }} </td>
+   <td> {{r.response_status }}</td>
+   <td>
+      <a href="{% url 'bb_request_detail' r.id %}">View Details</a>
+   </td>
+</tr>
+{% endfor %}
+
+</table>

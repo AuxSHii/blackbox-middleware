@@ -20,4 +20,5 @@ from django.urls import path,include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('test/' , include('recorder.urls')),
+    path('blackbox/' , include("recorder.urls_inspect")),   #for blackbox inspect page = blackbox/inspect
 ]

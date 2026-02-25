@@ -1,0 +1,39 @@
+<h1>BLACKBOX - Request Detail </h1>
+
+<hr>
+<h2>Request Info</h2>
+<p><b>Timestamp:</b> {{ timestamp }}</p>
+<p><b>Method::</b> {{ method }}</p>
+<p><b>Path:</b> {{ path }}</p>
+
+<hr>
+
+<h2>Response Info</h2>
+<p><b>Status Code</b> {{ original_response_status }}</p>
+
+{% if response_body %}
+<h3>Response Body</h3>
+<pre> {{ original_response_body }} </pre>
+{% else %}
+<p><i>No response body recorded</i></p>
+{% endif %}
+
+<hr>
+<h2>Headers</h2>
+<pre>
+    {% for key, value in headers.items %}      
+    {{ key }}: {{ value }}
+    {% endfor %}
+</pre>
+
+<hr>
+<h2>Request Body</h2>
+{% if body_raw %}
+<pre>{{ body_parsed }}</pre>
+{% else %}
+<p><i>Not a JSON request.</i></p>
+{% endif %}
+
+<hr>
+
+<a href="{% url 'blackbox-inspect' %}">Back to Dashboard</a>
