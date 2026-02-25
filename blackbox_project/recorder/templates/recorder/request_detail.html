@@ -1,5 +1,26 @@
 <h1>BLACKBOX - Request Detail </h1>
 
+<form action="{% url 'bb_replay' record.pk %}" method="post">
+   {% csrf_token %}
+   <button type="submit" >Replay This Request</button>
+</form>
+{% if replay_result %}
+<hr>
+<h2>Replay Result</h2>
+<p><b>Status match:</b> {{ replay_result.status_match  }}</p>
+<p><b>Body Match :</b> {{ replay_result.body_match  }}</p>
+
+<p><b>Original Status:</b> {{ replay_result.original_status }}</p>
+<p><b> Replay Status  :</b> {{ replay_result.replay_status }}</p>
+
+<p><b>Notes:</b> {{ replay_result.notes }}</p>
+{% endif %}
+
+
+
+
+
+
 <hr>
 <h2>Request Info</h2>
 <p><b>Timestamp:</b> {{ timestamp }}</p>

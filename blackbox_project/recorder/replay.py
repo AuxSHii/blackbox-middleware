@@ -11,17 +11,11 @@ class FakeResponse:
 
 
 #fxn for replaying req from our db through id
-def replay_request(record_id):
-    """wil replay a recorded request by ID using django's test client 
+def replay_request(record):
+    """wil replay a recorded request directly using django's test client 
      return RESPONSE OBJ if successfull or print the exception if it crashes
     
-    """   #that primary key field=id , that django provides to mdoels unless I DISABLE IT which I DID NOT..
-    try:                 #record=fetching the req we wanna replay with the help of id
-        record = RecordedRequest.objects.get(id=record_id)
-    except RecordedRequest.DoesNotExist:
-        print("no recorded request found with id:" , record_id)
-        return None
-
+    """   
     #will initialize django test client now
     client = Client()
 
@@ -60,73 +54,9 @@ def replay_request(record_id):
         print("REPLAY FINISHED STATUS:", response.status_code)
         return response
     except Exception as exc:
-        print(f"Exception during replay of record {record_id}: {exc}")
+        print(f"Exception during replay of record {record.pk}: {exc}")
         #return a fake response calling code can inspect status
         response = FakeResponse(status_code=500 , content=b"View Raised Exception")
 
     print("REPLAY FINISHED STATUS:" ,  response.status_code)
     return response 
-
-
-
-    #FXN TO COMPARE THE OLD RESPONSE AND NEW REPLAYED RESPONSE
-
-def compare_replay(record_id , replay_response):
-    """ 
-    compare REPLAYED response with orininal RECORDED response
-    DOES NOT RE RUN REPLAY JUST COMPARE RESULT
-    
-    """
-
-    try:
-        record = RecordedRequest.objects.get(id=record_id)
-    except RecordedRequest.DoesNotExist:
-        print("No recorded request found with id:" , record_id)
-        return None
-    
-    #orginal data from db
-    original_status = record.response_status
-    original_body = record.response_body
-    #REPLAY DATA
-    replay_status = replay_response.status_code
-
-    try:
-        replay_body = json.loads(replay_response.content.decode("utf-8"))
-    except Exception:
-        replay_body = replay_response.content.decode("utf-8" , errors="ignore")
-
-
-   
-    #COMPARISON
-    status_match = original_status == replay_status
-    body_match = original_body == replay_body
-
-
-    #RESULT
-    result = {
-        "status_match": status_match,
-        "body_match" : body_match,
-        "original_status": original_status,
-        "replay_status": replay_status,
-        "original_body": original_body,
-        "replay_body" : replay_body,
-    }
-
-
-    #OUR HUMAN ISNIGHTSS..
-    if status_match and body_match:    # if both true
-        result["notes"] = "Replay behaved ecaxtly the SAME."
-    elif not status_match and replay_status < 500:  #status match was fasle but replay_status is less then 500
-        result["notes"] = "status improved - bug likely FIXED."
-    elif not status_match:                    # status_match was false but still with RED FLAG CODE
-        result["notes"] = "status changed - behaviour DIFFERENT."
-    else:                  #status match is true but bodymatch is false
-        result["notes"] = "SAME status but DIFFERENT body-logic changed."
-
-
-
-
-    print("COMPARISON RESULT:" , result["notes"])
-    return result          
-
-    

@@ -3,5 +3,5 @@ from .views import boom
 
 urlpatterns =[
     path("boom/" , boom , name='boom'),
-
+ 
 ]

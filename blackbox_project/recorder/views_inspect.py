@@ -1,13 +1,45 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from .models import RecordedRequest
 from .analysis import failure_summary
 from .filter import last_minutes
 from django.shortcuts import get_object_or_404 
+from django.views.decorators.http import require_POST
+from recorder.compare import compare_replay
+from recorder.replay import replay_request
+
+@require_POST
+def replay_from_ui(request , pk):
+    """
+    trigger the replay from inspection Ui
+    """    
+    #fetch the recorded request by the primary key = id
+    record = get_object_or_404(RecordedRequest, pk=pk)
+                                           # remember stored req = record = user's req+ OG response codes and body both sotred
+    # replaying it using replay enegine      replaying a perticular request and storing the new response = status code+ body
+    replay_response = replay_request(record)
+
+    #compare original vs replayed   by calling replaly engine with that perticular req and replay respnse it gave
+    result = compare_replay(record , replay_response)
+
+    #temprorly store that result in our sessionnn to display
+    request.session["bb_last_replay"] = result
+
+    #redirect back to the same detail page
+    return redirect("bb_request_detail", pk=pk)
+
+
+
+
+
+
 #fxn for details of certain recorded request to display it
-def request_detail(request , record_id):
+def request_detail(request , pk):
     #detailed display for a single captured req.
    
-   record = get_object_or_404(RecordedRequest, id=record_id)
+   record = get_object_or_404(RecordedRequest, pk=pk)
+   
+   #
+   replay_result = request.session.pop("bb_last_replay", None)
 
    context = {
        "record": record,
@@ -20,6 +52,7 @@ def request_detail(request , record_id):
        "timestamp": record.timestamp,
        "original_response_status": record.response_status,
        "original_response_body": record.response_body,
+       "replay_result": replay_result,
     }
    return render(request , "recorder/request_detail.html" , context)    
 
