@@ -6,6 +6,8 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 from recorder.compare import compare_replay
 from recorder.replay import replay_request
+from django.core.paginator import Paginator
+from django.db.models import Q
 
 @require_POST
 def replay_from_ui(request , pk):
@@ -57,25 +59,62 @@ def request_detail(request , pk):
    return render(request , "recorder/request_detail.html" , context)    
 
 #fxn for inspect dashboard
+
+
 def inspect_dashboard(request):
-    """ friendy ispection dashboard for BLACKBOX [READ ONLY] """
-#all record requests (latest first)
+    """BLACKBOX Inspection Dashboard with filtering + pagination"""
+
     queryset = RecordedRequest.objects.all().order_by("-timestamp")
 
-    #activity in last 10 minute
-    recent_queryset = last_minutes(queryset , 10)
+    # -------------------------
+    #  filteriiings
+    # -------------------------
+    method = request.GET.get("method")
+    status = request.GET.get("status")
+    path = request.GET.get("path")
+    search = request.GET.get("search")
 
-    #use analytics alrready built
-    analytics = failure_summary(queryset)
+    if method:
+        queryset = queryset.filter(method__iexact=method)
 
-    context = {
-        "total": queryset.count(),  #total number of requests
-        "recent_count": recent_queryset.count(),  # recent req count of la st 10 min hard coded
-        "analytics": analytics,   # giving analytics dict
-        "latest": queryset[:10], #last 10 captured req
+    if status:
+        queryset = queryset.filter(response_status=status)
 
-    }
-    print("analytics data-" , analytics)
+    if path:
+        queryset = queryset.filter(path__icontains=path)
 
-    return render(request , "recorder/inspect.html" , context)
+    if search:
+        queryset = queryset.filter(
+            Q(path__icontains=search) |
+            Q(headers__icontains=search) |
+            Q(body_raw__icontains=search)
+        )
+
+    # -------------------------
+    #  PAGINATION 
+    # -------------------------
+    paginator = Paginator(queryset, 25)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    # -------------------------
+    #  ANALYTICS (GLOBAL DATA)
     
+    analytics = failure_summary(RecordedRequest.objects.all())
+
+    
+    # CONTEXT 
+    
+    context = {
+        "total": queryset.count(),
+        "analytics": analytics,
+        "page_obj": page_obj,
+        "filters": {
+            "method": method or "",
+            "status": status or "",
+            "path": path or "",
+            "search": search or "",
+        }
+    }
+
+    return render(request, "recorder/inspect.html", context)

@@ -82,6 +82,28 @@
 
 <h1>BLACKBOX Inspection Dashboard</h1>
 
+<hr>
+<h2>Search & Filters</h2>
+
+<form method="get">
+
+    <label>Method:</label>
+    <input type="text" name="method" value="{{ filters.method }}" placeholder="GET/POST" >
+    
+    <label>Status</label>
+    <input type="text" name="status" value="{{ filters.status }}" placeholder="200 / 500">
+
+    <label>Path Contains:</label>
+    <input type="text" name="path" value="{{filters.path}}"  placeholder="/api/" >
+
+    <label>Deep-Search</label>
+    <input type="text" name="search" value="{{filters.search}}" placeholder="headers/body search">
+
+    <button type="submit">Apply Filter</button>
+    <a href="{% url 'blackbox-inspect' %}">Reset</a>
+</form>
+</hr>
+
 <div class="flex-container">
     <div class="flex-item card">
         <p><b>Total Recorded Requests:</b> {{ total }}</p>
@@ -111,7 +133,7 @@
     </div>
 </div>
 
-<h2>Latest Captures</h2>
+<h2>All Captures</h2>
 <table>
     <tr>
         <th>Timestamp</th>
@@ -120,16 +142,46 @@
         <th>Status</th>
         <th>Action</th>
     </tr>
-    {% for r in latest %}
+    {% for r in page_obj %}
     <tr>
         <td>{{ r.timestamp }}</td>
         <td>{{ r.method }}</td>
         <td>{{ r.path }}</td>
         <td>{{ r.response_status }}</td>
-        <td><a href="{% url 'bb_request_detail' r.id %}">View Details</a></td>
+        <td><a href="{% url 'bb_request_detail' r.pk %}">View Details</a></td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="5" >No matching results found</td>
     </tr>
     {% endfor %}
 </table>
+
+<!-- pagination controls -->
+<hr>
+<div>
+    {% if page_obj.has_previous %}
+        <a href="?page=1&method={{filters.method}}&status={{filters.status}}&path={{filters.path}}&search={{filters.search}}">First</a>
+
+        <a href="?page={{ page_obj.previous_page_number }}&method={{filters.method}}&status={{filters.status}}&path={{filters.path}}&search={{filters.search}}">
+            Previous
+        </a>
+    {% endif %}
+
+    <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&method={{filters.method}}&status={{filters.status}}&path={{filters.path}}&search={{filters.search}}">
+            Next
+        </a>
+
+        <a href="?page={{ page_obj.paginator.num_pages }}&method={{filters.method}}&status={{filters.status}}&path={{filters.path}}&search={{filters.search}}">
+            Last
+        </a>
+    {% endif %}
+</div>
+
+
 
 </body>
 </html>
