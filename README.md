@@ -11,6 +11,10 @@ URL path + query string
 Important headers
 Raw request body
 Parsed JSON body (if applicable)
+<img width="1366" height="768" alt="replay and assess UI" src="https://github.com/user-attachments/assets/d949c3a1-09ce-4776-bb44-d1b75676d37a" />
+<img width="1366" height="768" alt="inspection ui" src="https://github.com/user-attachments/assets/32c92f0a-3fc8-4c69-9574-dbb8f94a972f" />
+<img width="1366" height="768" alt="detailed ui" src="https://github.com/user-attachments/assets/1ff7eeb4-8bc0-4cbd-bb19-7724c52c1fca" />
+
 Client IP
 Timestamp
 Response status + body (if available)
