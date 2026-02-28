@@ -88,6 +88,37 @@
 <p><i>No replay performed yet. Click the button above to replay this request.</i></p>
 {% endif %}
 
+<!-- diiff viwer  -->
+{% if replay_result.diff_table %}
+<hr>
+<h2>Response Difference</h2>
+
+<table style="width:100%; font-family: monospace;">
+<tr>
+    <th style="width:50%">Original</th>
+    <th style="width:50%">Replay</th>
+</tr>
+
+{% for type, orig, new in replay_result.diff_table %}
+<tr
+{% if type == "same" %} style="background:#1e1e1e;"
+{% elif type == "added" %} style="background:#153a1f;"
+{% elif type == "removed" %} style="background:#3a1515;"
+{% elif type == "changed" %} style="background:#3a3315;"
+{% endif %}
+>
+<td><pre style="margin:0">{{ orig }}</pre></td>
+<td><pre style="margin:0">{{ new }}</pre></td>
+</tr>
+{% endfor %}
+
+</table>
+{% endif %}
+
+
+
+
+
 <!-- Request Info -->
 <hr>
 <h2>Request Info</h2>

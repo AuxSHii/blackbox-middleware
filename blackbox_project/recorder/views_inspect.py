@@ -8,6 +8,7 @@ from recorder.compare import compare_replay
 from recorder.replay import replay_request
 from django.core.paginator import Paginator
 from django.db.models import Q
+from recorder.diff_engine import generate_diff,generate_side_by_side
 
 @require_POST
 def replay_from_ui(request , pk):
@@ -22,6 +23,15 @@ def replay_from_ui(request , pk):
 
     #compare original vs replayed   by calling replaly engine with that perticular req and replay respnse it gave
     result = compare_replay(record , replay_response)
+
+    #attaching diff infos
+    diff_text = generate_diff(record.response_body , replay_response.content)
+
+    side_by_side = generate_side_by_side(record.response_body , replay_response.content)
+
+    result["diff_text"] = diff_text    # adding a unifieddiff
+    result["diff_table"] = side_by_side  #adding lsit of lines of og and replay response to result
+
 
     #temprorly store that result in our sessionnn to display
     request.session["bb_last_replay"] = result
@@ -66,9 +76,9 @@ def inspect_dashboard(request):
 
     queryset = RecordedRequest.objects.all().order_by("-timestamp")
 
-    # -------------------------
+ 
     #  filteriiings
-    # -------------------------
+    
     method = request.GET.get("method")
     status = request.GET.get("status")
     path = request.GET.get("path")
@@ -90,16 +100,15 @@ def inspect_dashboard(request):
             Q(body_raw__icontains=search)
         )
 
-    # -------------------------
+  
     #  PAGINATION 
-    # -------------------------
+    
     paginator = Paginator(queryset, 25)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    # -------------------------
-    #  ANALYTICS (GLOBAL DATA)
-    
+   
+    #  ANALYTICS 
     analytics = failure_summary(RecordedRequest.objects.all())
 
     
