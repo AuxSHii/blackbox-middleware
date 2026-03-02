@@ -40,3 +40,23 @@ class RecordedRequest(models.Model):
 #when the req. occured/sent to server  - timestamp
 #optional labeling we can do - tag (ex: "payment_error")   
 
+
+
+#DB CLASS FOR REPLAYED REQUESTS
+class ReplayLog(models.Model):
+     recorded_request = models.ForeignKey(
+         RecordedRequest , on_delete=models.CASCADE, 
+         related_name="replays"
+     )
+     replayed_at = models.DateTimeField(auto_now_add=True)
+
+     status_before = models.IntegerField()
+     status_after = models.IntegerField()
+
+     body_changed = models.BooleanField(default=False)
+
+     notes = models.TextField(blank=True)
+
+
+     def __str__(self):
+         return f"Replay: {self.recorded_request.pk} @ {self.replayed_at}"

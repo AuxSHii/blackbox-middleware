@@ -88,6 +88,25 @@
 <p><i>No replay performed yet. Click the button above to replay this request.</i></p>
 {% endif %}
 
+<!-- replay history -->
+<hr>
+<h2>Replay History</h2>
+
+{% for r in replay_history %}
+<div style="margin-bottom: 10px; padding: 8px; background: #1a1a1a;">
+      <b>Time:</b> {{ r.replayed_at|date:"Y-m-d H:i" }} <br>
+      <b>Status:</b> {{ r.status_before }} &#x2193; {{ r.status_after }} <br>
+      <b>Body Changed:</b> {{ r.body_changed }} <br>
+      <b>Notes:</b> {{ r.notes }} 
+</div>
+{% empty %}
+<p>No replay yet.</p>
+{% endfor %}
+
+
+
+
+
 <!-- diiff viwer  -->
 {% if replay_result.diff_table %}
 <hr>

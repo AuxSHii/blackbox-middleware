@@ -9,6 +9,9 @@ from recorder.replay import replay_request
 from django.core.paginator import Paginator
 from django.db.models import Q
 from recorder.diff_engine import generate_diff,generate_side_by_side
+from .models import ReplayLog
+from .retention import enforce_replay_attention,get_bb_setting
+from django.utils import timezone
 
 @require_POST
 def replay_from_ui(request , pk):
@@ -24,6 +27,19 @@ def replay_from_ui(request , pk):
     #compare original vs replayed   by calling replaly engine with that perticular req and replay respnse it gave
     result = compare_replay(record , replay_response)
 
+    #replay log cration and linking
+    ReplayLog.objects.create(
+        recorded_request = record,
+        status_before = result["original_status"],
+        status_after = result["replay_status"],
+        body_changed = not result["body_match"],
+        notes = result["notes"]
+    )
+    #choose what to reatin and what not    - after adding of requests
+    enforce_replay_attention(record)
+
+   
+    
     #attaching diff infos
     diff_text = generate_diff(record.response_body , replay_response.content)
 
@@ -53,6 +69,9 @@ def request_detail(request , pk):
    #
    replay_result = request.session.pop("bb_last_replay", None)
 
+   replay_history = record.replays.all().order_by("-replayed_at")
+
+
    context = {
        "record": record,
        "headers": record.headers or {},
@@ -65,6 +84,7 @@ def request_detail(request , pk):
        "original_response_status": record.response_status,
        "original_response_body": record.response_body,
        "replay_result": replay_result,
+       "replay_history": replay_history
     }
    return render(request , "recorder/request_detail.html" , context)    
 

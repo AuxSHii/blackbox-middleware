@@ -1,5 +1,5 @@
 from django.urls import path
-from .views_inspect import inspect_dashboard,request_detail,replay_from_ui
+from .views_inspect import inspect_dashboard,request_detail,replay_from_ui,ReplayLog
 
 
 urlpatterns = [
