@@ -58,6 +58,7 @@
 
 <h1>BLACKBOX - Request Detail</h1>
 
+
 <!-- Replay Button -->
 <form action="{% url 'bb_replay' record.pk %}" method="post">
    {% csrf_token %}
@@ -87,6 +88,22 @@
 <hr>
 <p><i>No replay performed yet. Click the button above to replay this request.</i></p>
 {% endif %}
+
+<!-- change analyysis intell -->
+<hr>
+<h2>Change Analysis</h2>
+
+<p><b>Lines Added:</b> {{ replay_result.lines_added }}</p>
+<p><b>Lines Removed:</b> {{ replay_result.lines_removed }}</p>
+<p><b>Size Before:</b> {{ replay_result.size_before }} bytes</p>
+<p><b>Size After:</b> {{ replay_result.size_after }} bytes</p>
+<p><b>Change Severity:</b> {{ replay_result.change_score }}</p>
+
+{% if replay_result.keys_changed %}
+<p><b>JSON Keys Changed:</b></p>
+<pre>{{ replay_result.keys_changed }}</pre>
+{% endif %}
+
 
 <!-- replay history -->
 <hr>

@@ -12,6 +12,7 @@ from recorder.diff_engine import generate_diff,generate_side_by_side
 from .models import ReplayLog
 from .retention import enforce_replay_attention,get_bb_setting
 from django.utils import timezone
+from .intelligence import analyze_change
 
 @require_POST
 def replay_from_ui(request , pk):
@@ -26,14 +27,28 @@ def replay_from_ui(request , pk):
 
     #compare original vs replayed   by calling replaly engine with that perticular req and replay respnse it gave
     result = compare_replay(record , replay_response)
+    
+    #intell analysis
+    OG_BODY = record.response_body_text or ""
+    REPLAY_BODY= replay_response.content.decode() if replay_response.content else ""
 
+    analysis = analyze_change(OG_BODY , REPLAY_BODY)
     #replay log cration and linking
-    ReplayLog.objects.create(
+    replay_log  = ReplayLog.objects.create(
         recorded_request = record,
         status_before = result["original_status"],
         status_after = result["replay_status"],
         body_changed = not result["body_match"],
-        notes = result["notes"]
+        notes = result["notes"],
+
+        #intell. fields
+        lines_added = analysis["lines_added"],
+        lines_removed = analysis["lines_removed"],
+        size_before = analysis["size_before"],
+        size_after = analysis["size_after"],
+        keys_changed = analysis["keys_changed"],
+        change_score = analysis["change_score"],
+
     )
     #choose what to reatin and what not    - after adding of requests
     enforce_replay_attention(record)
@@ -41,14 +56,22 @@ def replay_from_ui(request , pk):
    
     
     #attaching diff infos
-    diff_text = generate_diff(record.response_body , replay_response.content)
+    diff_text = generate_diff(record.response_body_text , replay_response.content)
 
-    side_by_side = generate_side_by_side(record.response_body , replay_response.content)
+    side_by_side = generate_side_by_side(record.response_body_text , replay_response.content)
 
     result["diff_text"] = diff_text    # adding a unifieddiff
     result["diff_table"] = side_by_side  #adding lsit of lines of og and replay response to result
-
-
+    
+    #storing intell data in resut to pass it to templates
+    result["intelligence"] = {
+    "change_score": replay_log.change_score,
+    "lines_added": replay_log.lines_added,
+    "lines_removed": replay_log.lines_removed,
+    "size_before": replay_log.size_before,
+    "size_after": replay_log.size_after,
+    "keys_changed": replay_log.keys_changed,
+}
     #temprorly store that result in our sessionnn to display
     request.session["bb_last_replay"] = result
 
@@ -82,7 +105,7 @@ def request_detail(request , pk):
        "path": record.path,
        "timestamp": record.timestamp,
        "original_response_status": record.response_status,
-       "original_response_body": record.response_body,
+       "original_response_body": record.response_body_text,
        "replay_result": replay_result,
        "replay_history": replay_history
     }

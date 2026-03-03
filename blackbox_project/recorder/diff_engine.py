@@ -20,8 +20,8 @@ def normalize_body(body):
 def generate_diff(original_body , replay_body):
     # return a unified str btw og body and replay body
 
-    original_text = normalize_body(original_body).splitlines() #list of line of og body
-    replay_text = normalize_body(replay_body).splitlines()   #list of lines of replay body
+    original_text = str(original_body).splitlines() #list of line of og body
+    replay_text = str(replay_body).splitlines()   #list of lines of replay body
 
      #now these lines of og and replay can be coompared and bein a diff
 
@@ -34,12 +34,12 @@ def generate_diff(original_body , replay_body):
     )
 
 
-    return "/n".join(diff)   #join iterator returnd by unifiediff to str dor displaying
+    return "\n".join(diff)   #join iterator returnd by unifiediff to str dor displaying
 
 def generate_side_by_side(original_body , replay_body):
     #prod structure row for html rendering 
-    original_text = normalize_body(original_body).splitlines()
-    replay_text = normalize_body(replay_body).splitlines()
+    original_text = str(original_body).splitlines()
+    replay_text = str(replay_body).splitlines()
 
     matcher = difflib.SequenceMatcher(None, original_text , replay_text)
     #compare these 2 texts 
@@ -52,7 +52,7 @@ def generate_side_by_side(original_body , replay_body):
 
         elif opcode == "replace":
             for i in range(max(i2 - i1, j2 - j1)):
-                o = original_text[i1+i] if i1 + i < j2 else ""
+                o = original_text[i1+i] if i1 + i < i2 else ""
                 r = replay_text[j1+i] if j1 + i < j2 else ""
                 rows.append(("changed" , o , r))
 

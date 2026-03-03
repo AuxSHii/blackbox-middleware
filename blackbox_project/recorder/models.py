@@ -17,7 +17,8 @@ class RecordedRequest(models.Model):
   # for respnse data
 
   response_status = models.IntegerField()
-  response_body = models.JSONField(null=True, blank=True)
+  response_body_json = models.JSONField(null=True, blank=True)
+  response_body_text = models.TextField(null=True, blank=True)
 
   #debug metadata
 
@@ -56,6 +57,27 @@ class ReplayLog(models.Model):
      body_changed = models.BooleanField(default=False)
 
      notes = models.TextField(blank=True)
+
+     #intell felds
+
+     lines_added = models.IntegerField(null=True , blank=True)
+     lines_removed = models.IntegerField(null=True , blank=True)
+
+     size_before = models.IntegerField(null=True , blank=True)
+     size_after = models.IntegerField(null=True , blank=True)
+
+     keys_changed = models.JSONField(null=True , blank=True)
+
+     change_score = models.CharField(
+         max_length=10,
+         choices=[
+             ("LOW", "LOW"),
+             ("MEDIUM", "MEDIUM"),
+             ("HIGH" , "HIGH"),
+         ],
+         null=True , blank=True,
+     )
+
 
 
      def __str__(self):

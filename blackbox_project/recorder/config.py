@@ -11,7 +11,7 @@ class BlackBoxSettings:
     #here i defined the default configs
     DEFAULTS ={
         "RECORD_STATUS_CODES":[500], #ONLY RECORD SERVER ERRORS BYDEFAULT ..which http errors to save
-        "IGNORE_PATH": ["/admin" , "/static"], # those url paths blackbox don't careabout 
+        "IGNORE_PATHS": ["/admin" , "/static"], # those url paths blackbox don't careabout 
         "ENABLED": True, #masterswitch to turn it ON or OFF
     }
        #exc once at server startup

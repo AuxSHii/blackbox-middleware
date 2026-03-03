@@ -102,11 +102,18 @@ class BlackBoxMiddleware:
         if response.status_code not in self.settings.RECORD_STATUS_CODES:
             return       # record those req with codes already configured
 
-        try:       #what the server returned for thosee rerequests
-            response_body = response.content.decode("utf-8") # read what server returned  
-            response_body = json.loads(response_body) if response_body else None # convt json resp to py dict.
+        try:
+            raw_body = response.content.decode("utf-8", errors="ignore")
         except Exception:
-            response_body = None
+            raw_body = ""
+
+        try:
+           parsed_json = json.loads(raw_body)
+        except Exception:
+           parsed_json = None
+
+
+
 
           # SAVING RECORDED REQUEST (probelematic one) to OUR MODEL DB (RecordedRequest) class      
         RecordedRequest.objects.create(
@@ -117,9 +124,10 @@ class BlackBoxMiddleware:
             body_raw=request_data.get("body_raw"),
             body_parsed=request_data.get("body_parsed"),
             response_status=response.status_code,
-            response_body=response_body,
             ip_address=request_data.get("ip" , "127.0.0.1"), # here when saving recorded req t our db the ip will be either user fetched ip or the placeholder used in my replay fxn
             tag="auto-captured",
+            response_body_text=raw_body,
+            response_body_json=parsed_json,
         )
         #populating the field using the [request_data] and [response]S
 
