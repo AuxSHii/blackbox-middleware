@@ -63,6 +63,9 @@ class BlackBoxMiddleware:
             "Content-Type": request.headers.get("Content-Type"),
             "User-Agent": request.headers.get("User-Agent"),
             "Accept": request.headers.get("Accept"),
+            "Authorization": request.headers.get("Authorization"),
+            "Cookie": request.headers.get("Cookie"),
+            "X-Requested-With": request.headers.get("X-Requested-With"),
         }
 
         #returnign structured snapshot like json body+rawbody, headers etc

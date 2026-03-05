@@ -42,11 +42,11 @@ def analyze_change(original_body , replay_body):
     replay_text = safe_to_text(replay_body)   #returns a string[text]
     
     original_lines = original_text.splitlines()   #store og text line by line to use diff on it
-    replay_line = replay_text.splitlines()
+    replay_lines = replay_text.splitlines()
     
     #line differnece
 
-    diff = list(difflib.ndiff(original_lines, replay_line))
+    diff = list(difflib.ndiff(original_lines, replay_lines))
 
     lines_added = sum(1 for line in diff if line.startswith("+"))    #from diff[+lines added] = number of th0ose
     lines_removed = sum(1 for line in diff if line.startswith("-"))   #from diff [-lines removed] = number of thsoe

@@ -82,3 +82,11 @@ class ReplayLog(models.Model):
 
      def __str__(self):
          return f"Replay: {self.recorded_request.pk} @ {self.replayed_at}"
+     
+
+
+class MockItem(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name

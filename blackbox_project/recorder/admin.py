@@ -1,6 +1,8 @@
 from django.contrib import admin
 from .models import RecordedRequest  
 from .models import ReplayLog
+from .models import MockItem
+
    #my recordedreq model
 #registerd our recorder model here
 @admin.register(RecordedRequest)
@@ -27,3 +29,7 @@ class ReplayLogAdmin(admin.ModelAdmin):
 
     search_fields = ("recorded_request__path" ,)
 
+@admin.register(MockItem)
+class MockItemAdmin(admin.ModelAdmin):
+    list_display = ("name", "id" )
+    search_fields= ("name",)

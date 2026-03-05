@@ -3,6 +3,8 @@ from .models import RecordedRequest
 import json
 from urllib.parse import urlencode
 
+from django.db import transaction
+
 #simple class to simulate a response when view crashe i.e. exceptions happen = when django internal error resolution takes over
 class FakeResponse:
     def __init__(self , status_code , content=b""):
@@ -19,14 +21,13 @@ def replay_request(record):
     #will initialize django test client now
     client = Client()
 
-    #prepare the headers
+    #prepaing  the headers
     headers = record.headers or {}
     #django test client [requires special format for http_headers] 
     http_headers = {f"HTTP_{k.upper().replace('-', '_')}": v for k, v in headers.items()}
 
     #overridin defult testserver host
-    http_headers["HTTP_HOST"] = "127.0.0.1"
-
+    http_headers.setdefault("HTTP_HOST" , "127.0.0.1")
     #prepare method , path and body- prefer parsed json if exist , else raw
     method = record.method.lower()
     path = record.path
@@ -38,18 +39,23 @@ def replay_request(record):
         else:      #if stroed query_string is laready a string then append it as it is with the path..
             path = f"{path}?{query_string}"
 
-    #body: prefer parsed json if exists ,otherwise fall back to raw
-    body = record.body_parsed if getattr(record , "body_parsed" , None) else record.body_raw
-    #save body_parsed into body only if the attribute body_parsed exists in object record ..ie. if body parsed exist
-
+    if record.body_parsed:
+        body = json.dumps(record.body_parsed)
+    else:
+        body = record.body_raw
     
     #dispatching thwe request
     #generic() = will allow arb. HTTP methods (GET ,POST , PUT) 
     #sends modified/reconstructed body and headers
     #BLACKBOX still active at this point to record again - to compare new repnses with OG
+        
+    content_type = headers.get("Content-Type" , "application/json")
     
     try:    #try passing client testsever with our request of certain id , orint status and return response / if no response given out then rasie exception in which call that fakeresponse fxn that will give response 500 
-        response = client.generic(method.upper() , path , data=body , content_type=headers.get("Content-Type"), **http_headers)
+        with transaction.atomic(): 
+            response = client.generic(method.upper() , path , data=body , content_type=content_type, **http_headers)
+            #force rolllback - db stays same
+            transaction.set_rollback(True)
 
         print("REPLAY FINISHED STATUS:", response.status_code)
         return response

@@ -1,5 +1,22 @@
 import json
 import difflib
+import re
+
+#fxn for extracting djnago error page exceptions
+def extract_django_exception(text):
+    #detect djngo debug htmlpage and extract exception name only return simple text if found
+    
+    if not text:
+        return text
+    #look for django debug page patterns
+    if "Exception Type:" in text:
+        match = re.search(r"Exception Type:\s*([A-Za-z0-9_]+)" , text)
+
+        if match:
+            return f"Exception: {match.group(1)}"
+
+    return text 
+
 
 def normalize_body(body):
     #convt body - compararble str handle json,text safely
@@ -15,7 +32,8 @@ def normalize_body(body):
         parsed = json.loads(body)  #covt raw json body into py obj/dict
         return json.dumps(parsed , indent=2 , sort_keys=True)  #convt py obj to json and sorted in alphabetical order
     except Exception:
-        return str(body)
+        cleaned  =extract_django_exception(str(body))
+        return cleaned
 
 def generate_diff(original_body , replay_body):
     # return a unified str btw og body and replay body

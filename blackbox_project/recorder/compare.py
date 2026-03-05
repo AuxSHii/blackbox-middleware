@@ -52,10 +52,10 @@ def compare_replay(record  , replay_response):
         "replay_body" : replay_body,
         "original_size": len(str(original_body or "")),
         "replay_size": len(str(replay_body or "")),
-        # "normalized_original": normalized_original,
-        # "normalized_replay": normalized_replay,
+        "normalized_original": normalized_original,
+        "normalized_replay": normalized_replay,
         "diff_table": diff_table , 
-        **intelligence,
+        "analysis": intelligence,
     }
 
 

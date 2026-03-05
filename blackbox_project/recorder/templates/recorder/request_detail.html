@@ -74,14 +74,31 @@
 <p><b>Status Match:</b> {{ replay_result.status_match }}</p>
 <p><b>Body Match:</b> {{ replay_result.body_match }}</p>
 
+<h3>Endpoint Stability</h3>
+<p>
+    status: {{ stability.stability }}
+</p>
+
+<p>
+    Observed Statuses Codes: {{ stability.observed_statuses  }}
+</p>
+
+
+
 <div class="flex-container">
     <div class="flex-item">
         <h3>Original Body</h3>
-        <pre>{{ replay_result.original_body|default:"<empty>" }}</pre>
+        <details>
+            <summary><b>View Full Original Response</b></summary>
+            <pre>{{ replay_result.normalized_original|default:"<empty>" }}</pre>
+        </details>
     </div>
     <div class="flex-item">
         <h3>Replayed Body</h3>
-        <pre>{{ replay_result.replay_body|default:"<empty>" }}</pre>
+        <details>
+            <summary><b>View Full Replay Response</b></summary>
+            <pre>{{ replay_result.normalized_replay|default:"<empty>" }}</pre>
+        </details>
     </div>
 </div>
 {% else %}
@@ -90,20 +107,28 @@
 {% endif %}
 
 <!-- change analyysis intell -->
+{% if replay_result.analysis %}
 <hr>
 <h2>Change Analysis</h2>
 
-<p><b>Lines Added:</b> {{ replay_result.lines_added }}</p>
-<p><b>Lines Removed:</b> {{ replay_result.lines_removed }}</p>
-<p><b>Size Before:</b> {{ replay_result.size_before }} bytes</p>
-<p><b>Size After:</b> {{ replay_result.size_after }} bytes</p>
-<p><b>Change Severity:</b> {{ replay_result.change_score }}</p>
+<p><b>Change Severity:</b> {{ replay_result.analysis.change_score }}</p>
 
-{% if replay_result.keys_changed %}
+<p>
+    <b>Lines Added:</b> {{ replay_result.analysis.lines_added }} |
+    <b>Lines Removed:</b> {{ replay_result.analysis.lines_removed }}
+</p>
+<p>
+    <b>Size Before:</b> {{ replay_result.analysis.size_before }} bytes  |
+    <b>Size After:</b> {{ replay_result.analysis.size_after }} bytes
+</p>
+
+
+{% if replay_result.analysis.keys_changed %}
 <p><b>JSON Keys Changed:</b></p>
-<pre>{{ replay_result.keys_changed }}</pre>
+<pre>{{ replay_result.analysis.keys_changed }}</pre>
 {% endif %}
 
+{% endif %}
 
 <!-- replay history -->
 <hr>
@@ -127,7 +152,9 @@
 <!-- diiff viwer  -->
 {% if replay_result.diff_table %}
 <hr>
-<h2>Response Difference</h2>
+
+<details open>
+    <summary><b>Response Difference</b></summary>
 
 <table style="width:100%; font-family: monospace;">
 <tr>
@@ -151,7 +178,7 @@
 </table>
 {% endif %}
 
-
+</details>
 
 
 
@@ -177,12 +204,9 @@
 <hr>
 <h2>Response Info</h2>
 <p><b>Status Code:</b> {{ original_response_status }}</p>
-{% if original_response_body %}
-<h3>Response Body</h3>
-<pre>{{ original_response_body }}</pre>
-{% else %}
-<p><i>No response body recorded.</i></p>
-{% endif %}
+
+<p><i>Full response bodies avail. above in replay comparison.</i></p>
+
 
 <!-- Headers -->
 <hr>

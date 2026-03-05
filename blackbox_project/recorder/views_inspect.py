@@ -13,6 +13,7 @@ from .models import ReplayLog
 from .retention import enforce_replay_attention,get_bb_setting
 from django.utils import timezone
 from .intelligence import analyze_change
+from .stability import analyze_replay_stability
 
 @require_POST
 def replay_from_ui(request , pk):
@@ -94,6 +95,7 @@ def request_detail(request , pk):
 
    replay_history = record.replays.all().order_by("-replayed_at")
 
+   stability = analyze_replay_stability(record)
 
    context = {
        "record": record,
@@ -107,7 +109,8 @@ def request_detail(request , pk):
        "original_response_status": record.response_status,
        "original_response_body": record.response_body_text,
        "replay_result": replay_result,
-       "replay_history": replay_history
+       "replay_history": replay_history,
+       "stability": stability,
     }
    return render(request , "recorder/request_detail.html" , context)    
 
