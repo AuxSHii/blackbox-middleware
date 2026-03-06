@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand   #for terminal cmds
-from recorder.retention import purge_expired_replays  #my fxn for deleting old logs of replayed request used in the cmd
+from blackbox.retention import purge_expired_replays  #my fxn for deleting old logs of replayed request used in the cmd
 
 class Command(BaseCommand):      #class of cmds inherting from BaseCmd
     help = "clean old BLACKBOX replay logs based on TILL settings"  #

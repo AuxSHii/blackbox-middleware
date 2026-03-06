@@ -1,3 +1,97 @@
 from django.db import models
 
-# Create your models here.
+class RecordedRequest(models.Model):
+    # storing a snapshot of HTTP REQUEST + RESPONSE 
+    # to replay later
+
+    # requested data table
+
+  method = models.CharField(max_length=10)    # for like GET, POST
+  path = models.TextField()                      #api/orders/42   example
+  query_string = models.TextField(blank=True)
+
+  headers = models.JSONField(null=True , blank=True)          #these are for request headers
+  body_raw = models.TextField(null=True , blank=True) # raw body here which we use in replay fxn as it is the exact body request use int he django;s test client fxn
+  body_parsed = models.JSONField(null=True , blank=True) # a json parsed body for inspection 
+
+  # for respnse data
+
+  response_status = models.IntegerField()
+  response_body_json = models.JSONField(null=True, blank=True)
+  response_body_text = models.TextField(null=True, blank=True)
+
+  #debug metadata
+
+  ip_address = models.GenericIPAddressField(null=True , blank=True)
+  timestamp = models.DateTimeField(auto_now_add=True)
+
+  #will help filter bugs later (maybe)
+
+  tag = models.CharField(max_length=100 , blank=True)
+
+  def __str__(self):
+        return f"{self.method}  {self.path} -> {self.response_status}"
+
+
+#it should store
+
+#what the user sent - method,headers,body
+#where it was sent - path
+#what server/our backened replied - response_status , respnse_body
+#when the req. occured/sent to server  - timestamp
+#optional labeling we can do - tag (ex: "payment_error")   
+
+
+
+#DB CLASS FOR REPLAYED REQUESTS
+class ReplayLog(models.Model):
+     recorded_request = models.ForeignKey(
+         RecordedRequest , on_delete=models.CASCADE, 
+         related_name="replays"
+     )
+     replayed_at = models.DateTimeField(auto_now_add=True)
+
+     status_before = models.IntegerField()
+     status_after = models.IntegerField()
+
+     body_changed = models.BooleanField(default=False)
+
+     notes = models.TextField(blank=True)
+
+     regression = models.CharField(max_length=20 , 
+                                   choices=[
+                                       ("None" , "None"),
+                                       ( "REGRESSION"  , "REGRESSION" ),
+                                       ( "FIXED" , "FIXED" ),
+                                       ( "CHANGED" , "CHANGED" ),
+                                   ],
+                                   null=True,
+                                   blank=True,
+
+                                   )
+
+     #intell felds
+
+     lines_added = models.IntegerField(null=True , blank=True)
+     lines_removed = models.IntegerField(null=True , blank=True)
+
+     size_before = models.IntegerField(null=True , blank=True)
+     size_after = models.IntegerField(null=True , blank=True)
+
+     keys_changed = models.JSONField(null=True , blank=True)
+
+     change_score = models.CharField(
+         max_length=10,
+         choices=[
+             ("LOW", "LOW"),
+             ("MEDIUM", "MEDIUM"),
+             ("HIGH" , "HIGH"),
+         ],
+         null=True , blank=True,
+     )
+
+
+
+     def __str__(self):
+         return f"Replay: {self.recorded_request.pk} @ {self.replayed_at}"
+     

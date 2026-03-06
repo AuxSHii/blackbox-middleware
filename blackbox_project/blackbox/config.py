@@ -20,6 +20,9 @@ class BlackBoxSettings:
         self.config = {**self.DEFAULTS, **user_settings}   #merging ouur defaults with user settings
 # merging - start with default then overwrite whatever user provided
     def __getattr__(self , item):
-        return self.config.get(item)   #just for getting attributes with moe easy syntax like: self.settings.enabled or self.settings.path
+        try:
+           return self.config[item]
+        except KeyError:
+            raise AttributeError(f"Invalid BlackBox setting: {item} ")  
             
         

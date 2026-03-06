@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class BlackboxConfig(AppConfig):
+class RecorderConfig(AppConfig):
     name = 'blackbox'

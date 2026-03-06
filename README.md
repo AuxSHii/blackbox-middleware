@@ -1,99 +1,38 @@
-WHAT IS BLACKBOX?  v1 -> RECORDING + REPLAY + COMPARISON  NOW ADDED DRAFT INSPECTION DASHBOARD with analysis
-BLACKBOX is a django middleware that records failing HTTP requests and lets the user replay them as they originally happened.
+# BlackBox
 
-like a FLIGHT RECORDER for backend
+BLACKBOX is a Django middleware that records failing HTTP requests
+and allows replay and regression debugging.
+in a controlled db safe env.
+configurable by user.
 
+## Features
 
-It Automatically Records (configurable)
+- Automatic request recording
+- Replay engine
+- Response diff detection
+- Regression detection
 
-HTTP method (GET, POST, etc.)
-URL path + query string
-Important headers
-Raw request body
-Parsed JSON body (if applicable)
-<img width="1366" height="768" alt="replay and assess UI" src="https://github.com/user-attachments/assets/d949c3a1-09ce-4776-bb44-d1b75676d37a" />
-<img width="1366" height="768" alt="inspection ui" src="https://github.com/user-attachments/assets/32c92f0a-3fc8-4c69-9574-dbb8f94a972f" />
-<img width="1366" height="768" alt="detailed ui" src="https://github.com/user-attachments/assets/1ff7eeb4-8bc0-4cbd-bb19-7724c52c1fca" />
+## Installation
 
-Client IP
-Timestamp
-Response status + body (if available)
+pip install blackbox
 
-Even captures unhandled exceptions (server crashes)
+## Usage
 
+Add to INSTALLED_APPS:
 
-# Replay Any Recorded Request
-   You can replay a request exactly as the user sent it:
+    "blackbox"
 
-       from recorder.utils import replay_request
+Add middleware:
 
-       replay_request(1)
-BLACKBOX reconstructs:
-  Original headers
-  Original payload (raw or JSON)
-  Exact URL
-  Same request method
-# Compare Original vs Replay Behavior
+    "blackbox.middleware.BlackBoxMiddleware"
 
-  from recorder.utils import compare_with_replay
+#confugure in project seettings
 
-   compare_with_replay(1)
-
-
-Example Output:
-
- {
-   'status_match': True,
-   'body_match': False,
-   'original_status': 500,
-   'replay_status': 500,
-   'notes': 'Same failure, logic changed.'
-}
-This helps detect:
-
-
-1.Regression
-2.Silent behavior changes
-3.Incomplete fixes
- 
- 
- How It Works (Architecture)
-
-
-Incoming Request
-      ↓
-BLACKBOX Middleware
-      ↓
-If Failure → Snapshot Saved to DB
-      ↓
-Can Replays Snapshot Later
-      ↓
-System Reconstructs Original Request
-      ↓
-Compare Old vs New Behavior
-
-
-
- Installation (Inside a Django Project)
-1️.. Add App
-Add recorder to:
-
-INSTALLED_APPS = [
-    ...
-    "recorder",
-]
-2..   Register Middleware (IMPORTANT: near bottom)
-
-MIDDLEWARE = [
-    ...
-    "recorder.middleware.BlackBoxMiddleware",
-]
-    !   Place it late so it can observe final responses/exceptions.
-3️.   Configure BLACKBOX (optional)
-In settings.py:
-
-  BLACKBOX = {
-     "ENABLED": True,
-     "RECORD_STATUS_CODES": [500],
-     "IGNORE_PATHS": ["/admin"],
+BLACKBOX={
+   "ENABLED": True,               #master switch
+   "RECORD_STATUS_CODES": [500],  # only record 500 i.e. server crashes
+   "IGNORE_PATHS": ["/admin"],    # ignore admin panel = noise
+   "MAX_REPLAY_PER_REQUEST": 3,      #keep only latest n replays i.e.5 here configured
+   "DUPLICATE_IDENTICAL": True,       #deleeting spam replays
+   "REPLAY_TTL_DAYS":14,
 }

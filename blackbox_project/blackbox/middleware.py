@@ -28,10 +28,7 @@ class BlackBoxMiddleware:
         # Let Django process request first            
             response = self.get_response(request)          #all green-flag path here give control to django]VIEWS
                                                                  
-        except Exception as exc:                             #an exception/failure where no response was returned to BLACKBOX
-        # onllyyyy!!! NOW extract data (because crash happened)
-            request_data = self.extract_request_data(request)     
-            self.record_exception_event(request, exc, request_data)    #manually record the exception event 
+        except Exception:
             raise                                       # to raise exception - let django show error and control
                                                    
     # Decide if this response should be recorded
