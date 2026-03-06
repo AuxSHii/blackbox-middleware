@@ -14,7 +14,11 @@ configurable by user.
 
 ## Installation
 
-pip install blackbox
+pip install clock-box
+
+##through git
+
+pip install git+https://github.com/AuxSHii/blackbox-middleware.git
 
 ## Usage
 
