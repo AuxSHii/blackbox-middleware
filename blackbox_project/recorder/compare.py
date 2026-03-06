@@ -21,6 +21,17 @@ def compare_replay(record  , replay_response):
     #REPLAY DATA
     replay_status = replay_response.status_code
 
+    if original_status == replay_status:
+        regression = "NONE"
+    elif original_status < 500 and replay_status >= 500:
+        regression = "REGRESSION"
+
+    elif original_status >=500 and replay_status < 500:
+        regression = "FIXED"
+
+    else:
+        regression = "CHANGED"
+
     replay_body_raw = replay_response.content.decode("utf-8", errors="ignore")
 
     try:
@@ -56,6 +67,7 @@ def compare_replay(record  , replay_response):
         "normalized_replay": normalized_replay,
         "diff_table": diff_table , 
         "analysis": intelligence,
+        "regression": regression,
     }
 
 

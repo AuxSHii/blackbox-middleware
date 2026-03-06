@@ -72,7 +72,9 @@ def replay_from_ui(request , pk):
     "size_before": replay_log.size_before,
     "size_after": replay_log.size_after,
     "keys_changed": replay_log.keys_changed,
+    
 }
+    regression = result["regression"], 
     #temprorly store that result in our sessionnn to display
     request.session["bb_last_replay"] = result
 

@@ -58,6 +58,18 @@ class ReplayLog(models.Model):
 
      notes = models.TextField(blank=True)
 
+     regression = models.CharField(max_length=20 , 
+                                   choices=[
+                                       ("None" , "None"),
+                                       ( "REGRESSION"  , "REGRESSION" ),
+                                       ( "FIXED" , "FIXED" ),
+                                       ( "CHANGED" , "CHANGED" ),
+                                   ],
+                                   null=True,
+                                   blank=True,
+
+                                   )
+
      #intell felds
 
      lines_added = models.IntegerField(null=True , blank=True)
