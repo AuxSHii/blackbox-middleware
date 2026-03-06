@@ -1,4 +1,5 @@
 # BlackBox
+![Uploading blackbox architecture.png…]()
 
 BLACKBOX is a Django middleware that records failing HTTP requests
 and allows replay and regression debugging.<img width="1366" height="768" alt="detailed ui" src="https://github.com/user-attachments/assets/77c65355-fc19-4c12-b3c8-08286542f1fb" />
